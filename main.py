@@ -6,6 +6,5 @@
 
 
 hero.fd(100)
-hero.rt(90)
-hero.fd(100)
+
 
