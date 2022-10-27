@@ -1,5 +1,8 @@
 #!/bin/bash
 
 DIR=$( dirname "$0" )
-emacs $DIR/main.py
+#edit $DIR/main.py &
+python3 turtle_core.py 
+
+
 
