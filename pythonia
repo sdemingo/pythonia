@@ -2,7 +2,7 @@
 
 DIR=$( dirname "$0" )
 #edit $DIR/main.py &
-python3 turtle_core.py 
+python3 core.py 
 
 
 
