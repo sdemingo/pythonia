@@ -6,18 +6,43 @@ import sys
 import signal
 import traceback
 
-hero=Turtle()
-
-
 HEIGHT=500
 WIDTH=500
+
+class Agent(Turtle):
+    def __init__(self):
+        Turtle.__init__(self)
+        self.counter=0
+
+    def put(self,n=1):
+        self.counter+=n
+        
+    def take(self,n=1):
+        if (self.counter > n):
+            self.counter-=n
+        else:
+            raise AgentError("Agent's counter is zero")
+
+    def reset(self):
+        Turtle.reset(self)
+        self.counter=0
+
+    def info(self,show=True):
+        self.pu()
+        self.setpos(self.xcor()-10,self.ycor()-10)
+        self.write(self.counter)
+        self.setpos(self.xcor()+10,self.ycor()+10)
+        self.pd()
+        
+
+class AgentError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
 
 
 class Script:
     def __init__(self):
-        self.hero=Turtle()
         self.setFile("main.py")
-
 
     def setFile(self,filepath):
         self.filename=os.path.basename(filepath)
@@ -27,7 +52,7 @@ class Script:
         hero.reset()
         gui.reset()
         exec(open(self.filename).read())
-
+        hero.info()
 
 
 
@@ -64,7 +89,10 @@ class GUI:
         self.labelError.config(text=print_format.format(line_number, ex))
 
     def run_script(self):
-        script.reload()
+        try:
+            script.reload()
+        except Exception as error:
+            self.print_error(error)
         
     def open_script(self):
         filepath = filedialog.askopenfilename()
@@ -79,6 +107,10 @@ def handler(signum, frame):
     print ("Cierra la ventana para cerrar la aplicación")
 
 
+
+
+
+hero=Agent()
 script=Script()
 gui=GUI()
 
@@ -86,13 +118,9 @@ gui=GUI()
 if __name__=='__main__':
 
     signal.signal(signal.SIGINT, handler)
-    gui.screen.onkey(script.reload,'F5')
-    
-    try:
-        script.reload()
-    except Exception as error:
-        gui.print_error(error)
+    gui.screen.onkey(gui.run_script,'F5')
 
+    gui.run_script()    
     gui.screen.listen()
     gui.screen.mainloop()
 

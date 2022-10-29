@@ -4,6 +4,10 @@
 ## Por ejemplo usa:  hero.fd(100)
 
 hero.fd(200)
-hero.lt(90)
+hero.rt(90)
 hero.fd(200)
 
+hero.put(5)
+
+hero.rt(90)
+hero.fd(200)
