@@ -4,22 +4,10 @@
 ## Por ejemplo usa:  hero.fd(100)
 
 
-#hero.fd(300)
-#hero.rt(90)
-#hero.fd(300)
-#hero.rt(90)
-#hero.fd(300)
-#hero.rt(90)
-#hero.fd(300)
+hero.fd(30)
+hero.rt(90)
+hero.fd(50)
+hero.lt(90)
+hero.fd(30)
 
-hero.put(3)
-
-i=1
-while (i<=4):
-	hero.fd(150)
-	hero.rt(90)
-	i=i+1
-
-
-hero.put(3)
 
