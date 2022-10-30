@@ -10,8 +10,9 @@ HEIGHT=500
 WIDTH=500
 
 class Agent(Turtle):
-    def __init__(self):
+    def __init__(self,name):
         Turtle.__init__(self)
+        self.name=name
         self.counter=0
 
     def put(self,n=1):
@@ -27,12 +28,10 @@ class Agent(Turtle):
         Turtle.reset(self)
         self.counter=0
 
-    def info(self,show=True):
-        self.pu()
-        self.setpos(self.xcor()-10,self.ycor()-10)
-        self.write(self.counter)
-        self.setpos(self.xcor()+10,self.ycor()+10)
-        self.pd()
+    def info(self):
+        x=int(self.xcor())
+        y=int(self.ycor())
+        return "{} [counter: {} pos: ({},{})]\n".format(self.name,self.counter,x,y)
         
 
 class AgentError(Exception):
@@ -49,10 +48,10 @@ class Script:
         self.filepath=filepath
         
     def reload(self):
-        hero.reset()
+        for agent in agents:
+            agent.reset()
         gui.reset()
         exec(open(self.filename).read())
-        hero.info()
 
 
 
@@ -71,12 +70,16 @@ class GUI:
         buttonRun = Button(canvas.master, text="Run", height=1, width=5, command=self.run_script)
         labelFile = Label(canvas.master, text=script.filename, bg="#fff")
         self.labelError = Label(canvas.master, text="", bg="#fff",fg="#C10000")
-
+        self.labelInfo = Label(canvas.master, text="", bg="#fff",fg="#000",font=("Arial", 8))
+        
         buttonOpen.place(x=5, y=5)
         buttonEdit.place(x=75, y=5)
         buttonRun.place(x=145, y=5)
-        labelFile.place(x=215,y=10)
+        labelFile.place(x=215,y=15)
+        
         self.labelError.place(x=7,y=50)
+        self.labelInfo.place(x=7,y=80)
+        
 
     def reset(self):
         self.labelError.config(text="")
@@ -101,6 +104,14 @@ class GUI:
     def edit_script(self):
         os.system("gedit "+script.filepath+" &")
 
+    def show_info(self):
+        s=""
+        for agent in agents:
+            s+=agent.info()
+        self.labelInfo.config(text=s)
+        self.screen.ontimer(self.show_info,100)
+
+
 
     
 def handler(signum, frame):
@@ -109,8 +120,7 @@ def handler(signum, frame):
 
 
 
-
-hero=Agent()
+agents=[]
 script=Script()
 gui=GUI()
 
@@ -120,6 +130,11 @@ if __name__=='__main__':
     signal.signal(signal.SIGINT, handler)
     gui.screen.onkey(gui.run_script,'F5')
 
+    hero=Agent("hero")
+    agents.append(hero)
+
+    gui.show_info()
+    
     gui.run_script()    
     gui.screen.listen()
     gui.screen.mainloop()
