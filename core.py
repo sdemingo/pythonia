@@ -1,10 +1,11 @@
 
 from turtle import *
-from tkinter import Button,Label,filedialog
+from tkinter import *
 import os
 import sys
 import signal
 import traceback
+import threading
 
 HEIGHT=500
 WIDTH=500
@@ -15,6 +16,16 @@ class Agent(Turtle):
         self.name=name
         self.counter=0
         self.speed(1)
+        self.color("#000")
+        self.onrelease(self.release_mouse_click)
+        self.onclick(self.press_mouse_click)
+
+    def release_mouse_click(self,btn,add):
+        self.color("#000")
+
+    def press_mouse_click(self,btn,add):
+        self.color("#C10000")
+        gui.print_console(self.info())
 
     def reset(self):
         self.clear()
@@ -76,6 +87,15 @@ class World:
             s+=agent.info()
         return s
 
+    def getAllAgents():
+        return self.agents.values()
+
+    def getAgentInPosition(self,x,y):
+        for agent in self.agents.values():
+            if ((abs(agent.xcor()-x)<10) and (abs(agent.ycor()-y)<10)):
+                return agent
+        return None
+
     def detect_collisions(self):
         allnames=self.agents.keys()
         for agent in allnames:
@@ -96,17 +116,26 @@ class GUI:
         self.worldpath="world.py"
         self.worldname=os.path.basename(self.worldpath)
         
+        self.console=[]
+        self.running=False
+        
         self.screen=wn
         self.screen.title("Pythonia 0.1")
         canvas = self.screen.getcanvas()
         canvas.master.minsize(WIDTH,HEIGHT)
         
-        buttonOpen = Button(canvas.master, text="Open", height=1, width=5,  command=self.open_script)
-        buttonEdit = Button(canvas.master, text="Edit", height=1, width=5, command=self.edit_script)
-        buttonRun = Button(canvas.master, text="Run", height=1, width=5, command=self.run_script)
+        buttonOpen = Button(canvas.master, text="Open", height=1, width=5,
+                            command=self.open_script)
+        buttonEdit = Button(canvas.master, text="Edit", height=1, width=5,
+                            command=self.edit_script)
+        buttonRun = Button(canvas.master, text="Run", height=1, width=5,
+                           command=self.run_script)
         labelFile = Label(canvas.master, text=self.scriptname, bg="#fff")
         self.labelError = Label(canvas.master, text="", bg="#fff",fg="#C10000")
-        self.labelInfo = Label(canvas.master, text="", bg="#fff",fg="#000",font=("Arial", 8))
+        self.consoleText = Text(canvas.master,width=30,height=5,
+                              font=("Arial",8),bd=0,highlightthickness = 0,
+                              borderwidth=0)
+        self.consoleText.config(spacing1=3)
         
         buttonOpen.place(x=5, y=5)
         buttonEdit.place(x=75, y=5)
@@ -114,7 +143,7 @@ class GUI:
         labelFile.place(x=215,y=15)
         
         self.labelError.place(x=7,y=50)
-        self.labelInfo.place(x=7,y=80)
+        self.consoleText.place(x=7,y=80)
         
 
     def reset(self):
@@ -128,19 +157,27 @@ class GUI:
         self.labelError.config(text=print_format.format(filename,line_number, ex))
 
     def run_script(self):
+        if self.running:
+            return
+        
+        self.running=True
         world.reset()
-        gui.reset()
+        self.reset()
+        self.show_collisions()
         
         try:
             exec(open(self.worldpath).read())
         except Exception as error:
             self.print_error(error,self.worldname)
+            self.running=False
             return
         
         try:
             exec(open(self.scriptpath).read())
         except Exception as error:
             self.print_error(error,self.scriptname)
+
+        self.running=False
             
         
     def open_script(self):
@@ -150,11 +187,14 @@ class GUI:
     def edit_script(self):
         os.system("gedit "+script.filepath+" &")
 
-    def show_info(self):
-        s=world.info()
-        self.labelInfo.config(text=s)
-        self.screen.ontimer(self.show_info,100)
-
+    def print_console(self,text):
+        if (len(self.console)>5):
+            self.console=self.console[:5]
+        self.console.insert(0,text)
+        self.consoleText.delete('1.0',END)
+        for l in self.console:
+            self.consoleText.insert(INSERT,l)
+        
     def show_collisions(self):
         s=world.detect_collisions()
         self.labelError.config(text=s)
@@ -177,14 +217,7 @@ if __name__=='__main__':
     signal.signal(signal.SIGINT, handler)
     gui.screen.onkey(gui.run_script,'F5')
 
-    gui.show_info()
-
-    gui.show_collisions()
-    
     gui.run_script()
-
-    #gui.collisions()
-
     
     gui.screen.listen()
     gui.screen.mainloop()
