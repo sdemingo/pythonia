@@ -14,6 +14,7 @@ class Agent(Turtle):
         Turtle.__init__(self)
         self.name=name
         self.counter=0
+        self.speed(1)
 
     def reset(self):
         self.clear()
@@ -55,9 +56,9 @@ class AgentError(Exception):
 
 
 
-        
-class World:
+COLLISION_DISTANCE=30
 
+class World:
     def __init__(self):
         self.agents={}
 
@@ -75,7 +76,13 @@ class World:
             s+=agent.info()
         return s
 
-
+    def detect_collisions(self):
+        allnames=self.agents.keys()
+        for agent in allnames:
+            for other in allnames:
+                if (agent!=other):
+                    if (self.agents[agent].distance(self.agents[other])<=5):
+                        return "ERROR por colisión entre {} y {}".format(agent,other)
 
     
 
@@ -134,6 +141,7 @@ class GUI:
             exec(open(self.scriptpath).read())
         except Exception as error:
             self.print_error(error,self.scriptname)
+            
         
     def open_script(self):
         filepath = filedialog.askopenfilename()
@@ -147,7 +155,11 @@ class GUI:
         self.labelInfo.config(text=s)
         self.screen.ontimer(self.show_info,100)
 
-
+    def show_collisions(self):
+        s=world.detect_collisions()
+        self.labelError.config(text=s)
+        self.screen.ontimer(self.show_collisions,50)
+        
 
     
 def handler(signum, frame):
@@ -166,8 +178,14 @@ if __name__=='__main__':
     gui.screen.onkey(gui.run_script,'F5')
 
     gui.show_info()
+
+    gui.show_collisions()
     
-    gui.run_script()    
+    gui.run_script()
+
+    #gui.collisions()
+
+    
     gui.screen.listen()
     gui.screen.mainloop()
 

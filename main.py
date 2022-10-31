@@ -5,9 +5,10 @@
 
 
 hero.fd(30)
+hero.fd(70)
 hero.rt(90)
-hero.fd(50)
-hero.lt(90)
-hero.fd(30)
+hero.fd(60)
+
+#hero.fd(30)
 
 
