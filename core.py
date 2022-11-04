@@ -11,11 +11,21 @@ HEIGHT=500
 WIDTH=500
 
 class Agent(Turtle):
-    def __init__(self,name):
+    def __init__(self,name,x=0,y=0,counter=0,radius=1):
         Turtle.__init__(self)
         self.name=name
-        self.counter=0
+        self.counter=counter
+        self.radius=radius
+        
         self.speed(1)
+#        self.color("black","green")
+
+        self.shape("circle")
+        self.shapesize(self.radius,self.radius,self.radius)
+
+        self.pu()
+        self.setposition(x,y)
+        self.pd()
         self.color("#000")
         self.onrelease(self.release_mouse_click)
         self.onclick(self.press_mouse_click)
@@ -47,17 +57,6 @@ class Agent(Turtle):
         return "{:>8.8} [counter:{:2d}  pos:({:3d},{:3d})]\n".format(self.name,self.counter,x,y)
 
 
-class Area(Agent):
-    def __init__(self,name,x,y):
-        Agent.__init__(self,name)
-        self.shape("circle")
-        self.pu()
-        self.setposition(x,y)
-
-    def setInitialCounter(self,n):
-        self.counter=n
-        
-
 class AgentError(Exception):
     def __init__(self, message):
         super().__init__(message)
@@ -67,9 +66,12 @@ class AgentError(Exception):
 
 
 
-COLLISION_DISTANCE=30
+
 
 class World:
+
+    RADIUS_BASE=11
+    
     def __init__(self):
         self.agents={}
 
@@ -101,8 +103,11 @@ class World:
         for agent in allnames:
             for other in allnames:
                 if (agent!=other):
-                    if (self.agents[agent].distance(self.agents[other])<=5):
-                        return "ERROR por colisión entre {} y {}".format(agent,other)
+                    a1=self.agents[agent]
+                    a2=self.agents[other]
+                    collision_distance=((self.RADIUS_BASE)*a1.radius)+((self.RADIUS_BASE*a2.radius))
+                    if (a1.distance(a2) <= collision_distance):
+                        return "ERROR por colisión entre {} y {} ({})".format(agent,other,collision_distance)
 
     
 
@@ -164,6 +169,11 @@ class GUI:
         world.reset()
         self.reset()
         self.show_collisions()
+
+        hero=Agent("hero")
+        hero.shape("classic")
+        hero.radius=0.4
+        world.add(hero)
         
         try:
             exec(open(self.worldpath).read())

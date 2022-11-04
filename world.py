@@ -1,16 +1,12 @@
 # Ejemplo de mundo para pythonia
 
-hero=Agent("hero")
-world.add(hero)
-
 
     
-zona1 = Area("zona1",-40,40)
+zona1 = Agent("zona1",-40,40,5)
 world.add(zona1)
-zona1.setInitialCounter(5)
 
 
-zona2 = Area("zona2",50,0)
+zona2 = Agent("zona2",50,38,radius=3)
 world.add(zona2)
-zona1.setInitialCounter(5)
+
 
