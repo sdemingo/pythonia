@@ -5,20 +5,23 @@ import os
 import sys
 import signal
 import traceback
-import threading
+import time
 
 HEIGHT=500
 WIDTH=500
 
 class Agent(Turtle):
+
+    RADIUS_BASE=11
+        
     def __init__(self,name,x=0,y=0,counter=0,radius=1):
         Turtle.__init__(self)
         self.name=name
         self.counter=counter
         self.radius=radius
+        self.prog=[]
         
         self.speed(1)
-#        self.color("black","green")
 
         self.shape("circle")
         self.shapesize(self.radius,self.radius,self.radius)
@@ -41,6 +44,16 @@ class Agent(Turtle):
         self.clear()
         self.hideturtle()
         self.counter=0
+
+    # Añade una instrucción primitiva al programa interno de cada agente
+    def do(self,instruction,*argv):
+        self.prog.append((instruction,*argv))
+
+    # Ejecuta el programa interno de ese agente
+    def run_program(self):
+        for instruction in self.prog:
+            f,*args=instruction
+            f(*args)
 
     def put(self,area):
         self.counter+=1
@@ -69,8 +82,6 @@ class AgentError(Exception):
 
 
 class World:
-
-    RADIUS_BASE=11
     
     def __init__(self):
         self.agents={}
@@ -105,10 +116,15 @@ class World:
                 if (agent!=other):
                     a1=self.agents[agent]
                     a2=self.agents[other]
-                    collision_distance=((self.RADIUS_BASE)*a1.radius)+((self.RADIUS_BASE*a2.radius))
+                    collision_distance=((Agent.RADIUS_BASE)*a1.radius)+((Agent.RADIUS_BASE*a2.radius))
                     if (a1.distance(a2) <= collision_distance):
                         return "ERROR por colisión entre {} y {} ({})".format(agent,other,collision_distance)
 
+
+    # Ejecuta el programa interno de cada agente
+    def procAgentsPrograms(self):
+        for agent in self.agents.keys():
+            self.agents[agent].run_program()
     
 
 class GUI:
