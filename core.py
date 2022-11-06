@@ -197,6 +197,9 @@ class GUI:
             self.print_error(error,self.worldname)
             self.running=False
             return
+
+        ## ¿Deberia volver a llamarlo recursivamente para ejecutarlo todo el rato?
+        self.screen.ontimer(world.procAgentsPrograms,50)
         
         try:
             exec(open(self.scriptpath).read())

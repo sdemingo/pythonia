@@ -17,6 +17,6 @@ world.add(zona2)
 
 
 
-world.procAgentsPrograms()
+#world.procAgentsPrograms()
 
 
