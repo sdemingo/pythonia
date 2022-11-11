@@ -1,6 +1,7 @@
 
 from turtle import *
 from tkinter import *
+from tkinter.filedialog import askopenfilename
 import os
 import sys
 import signal
@@ -22,13 +23,12 @@ class Agent(Turtle):
         self.prog=[]
         
         self.speed(1)
-
+        
         self.shape("circle")
         self.shapesize(self.radius,self.radius,self.radius)
 
         self.pu()
         self.setposition(x,y)
-        self.pd()
         self.color("#000")
         self.onrelease(self.release_mouse_click)
         self.onclick(self.press_mouse_click)
@@ -151,7 +151,7 @@ class GUI:
                             command=self.edit_script)
         buttonRun = Button(canvas.master, text="Run", height=1, width=5,
                            command=self.run_script)
-        labelFile = Label(canvas.master, text=self.scriptname, bg="#fff")
+        self.labelFile = Label(canvas.master, text=self.scriptname, bg="#fff")
         self.labelError = Label(canvas.master, text="", bg="#fff",fg="#C10000")
         self.consoleText = Text(canvas.master,width=30,height=5,
                               font=("Arial",8),bd=0,highlightthickness = 0,
@@ -161,7 +161,7 @@ class GUI:
         buttonOpen.place(x=5, y=5)
         buttonEdit.place(x=75, y=5)
         buttonRun.place(x=145, y=5)
-        labelFile.place(x=215,y=15)
+        self.labelFile.place(x=215,y=15)
         
         self.labelError.place(x=7,y=50)
         self.consoleText.place(x=7,y=80)
@@ -189,6 +189,7 @@ class GUI:
         hero=Agent("hero")
         hero.shape("classic")
         hero.radius=0.4
+        hero.pd()
         world.add(hero)
         
         try:
@@ -210,11 +211,16 @@ class GUI:
             
         
     def open_script(self):
-        filepath = filedialog.askopenfilename()
-        script.setFile(filepath)
+        filepath = askopenfilename()
+        if len(filepath)>0:
+            self.scriptpath=filepath
+            self.scriptname=os.path.basename(self.scriptpath)
+            self.labelFile.config(text=self.scriptname)
+            self.run_script()
+
 
     def edit_script(self):
-        os.system("gedit "+script.filepath+" &")
+        os.system("gedit "+self.scriptpath+" &")
 
     def print_console(self,text):
         if (len(self.console)>5):
@@ -242,6 +248,8 @@ gui=GUI()
 
 
 if __name__=='__main__':
+
+    mode("logo")
 
     signal.signal(signal.SIGINT, handler)
     gui.screen.onkey(gui.run_script,'F5')
